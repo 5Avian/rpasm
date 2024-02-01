@@ -1,0 +1,21 @@
+..rodata
+:msg "Hello World"
+:nl data(byte, 10)					; ascii newline
+
+..text
+global(_start)
+
+:_start
+	$msg call(print, 1)				; print `msg`
+	60 0 syscall(2)					; exit(0)
+
+:print args(1)						; function `print`
+	1 1 $2 1						; write, stdout, input, 1
+:__put
+	$1 #byte 0 == jmpif(__end)		; return on nil terminator
+	$3 $3 $3 $3 syscall(4) ?1		; write char to stdout
+	:1 1 + :1						; increment pointer
+	jmp(__put)						; restart loop
+:__end
+	:1 ?1 $nl :1 syscall(4) ?1		; write newline to stdout
+	?1 0 return()					; trash arg, return 0
